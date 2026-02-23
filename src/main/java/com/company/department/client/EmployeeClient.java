@@ -18,7 +18,7 @@ public class EmployeeClient {
 
 	    private final WebClient webClient =
 	            WebClient.builder()
-	                    .baseUrl("http://localhost:8083")
+	                    .baseUrl("http://employee-service:8083")
 	                    .build();
 
 	    public List<EmployeeDto> getEmployeesByDepartment(Long deptId){
