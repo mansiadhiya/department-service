@@ -20,57 +20,58 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DepartmentServiceImpl implements DepartmentService{
 	
-    private final DepartmentRepository repository;
+    private final DepartmentRepository departmentRepository;
     private final EmployeeClient employeeClient;
+    private final DepartmentMapper departmentMapper;
     
     @Override
-    public DepartmentDTO createDepartment(DepartmentDTO dto) {
-        log.info("Creating department with name={}", dto.getName());
-        Department entity = DepartmentMapper.toEntity(dto);
-        Department saved = repository.save(entity);
-        log.info("Department created successfully with departmentId={}, name={}", saved.getId(), saved.getName());
-        return DepartmentMapper.toDTO(saved);
+    public DepartmentDTO createDepartment(DepartmentDTO departmentDto) {
+        log.info("Creating department with name={}", departmentDto.getName());
+        Department departmentEntity = departmentMapper.toEntity(departmentDto);
+        Department savedDepartment = departmentRepository.save(departmentEntity);
+        log.info("Department created successfully with departmentId={}, name={}", savedDepartment.getId(), savedDepartment.getName());
+        return departmentMapper.toDTO(savedDepartment);
     }
     
     @Override
     public List<DepartmentDTO> getAllDepartments() {
         log.info("Fetching all departments");
-        List<DepartmentDTO> departments = repository.findAll()
+        List<DepartmentDTO> departmentList = departmentRepository.findAll()
                 .stream()
-                .map(DepartmentMapper::toDTO)
+                .map(departmentMapper::toDTO)
                 .toList();
-        log.info("Found {} departments", departments.size());
-        return departments;
+        log.info("Found {} departments", departmentList.size());
+        return departmentList;
     }
 
 	@Override
-	public DepartmentDTO getDepartment(Long id) {
-		log.info("Fetching department with departmentId={}", id);
-		 Department dep = repository.findById(id)
+	public DepartmentDTO getDepartment(Long departmentId) {
+		log.info("Fetching department with departmentId={}", departmentId);
+		 Department foundDepartment = departmentRepository.findById(departmentId)
 	                .orElseThrow(() -> {
-	                    log.error("Department not found with departmentId={}", id);
-	                    return new ResourceNotFoundException("Department not found with id " + id);
+	                    log.error("Department not found with departmentId={}", departmentId);
+	                    return new ResourceNotFoundException("Department not found with id " + departmentId);
 	                });
-		log.info("Department found with departmentId={}, name={}", dep.getId(), dep.getName());
-	        return DepartmentMapper.toDTO(dep);
+		log.info("Department found with departmentId={}, name={}", foundDepartment.getId(), foundDepartment.getName());
+	        return departmentMapper.toDTO(foundDepartment);
 	}
 
 	@Override
-	public DepartmentEmployeesResponse getEmployees(Long id) {
-		log.info("Fetching employees for departmentId={}", id);
-		  Department dept = repository.findById(id)
+	public DepartmentEmployeesResponse getEmployees(Long departmentId) {
+		log.info("Fetching employees for departmentId={}", departmentId);
+		  Department foundDepartment = departmentRepository.findById(departmentId)
 	                .orElseThrow(() -> {
-	                    log.error("Department not found with departmentId={}", id);
+	                    log.error("Department not found with departmentId={}", departmentId);
 	                    return new RuntimeException("Department not found");
 	                });
 
-	        List<EmployeeDto> employees = employeeClient.getEmployeesByDepartment(id);
-	        log.info("Found {} employees for departmentId={}", employees.size(), id);
+	        List<EmployeeDto> departmentEmployees = employeeClient.getEmployeesByDepartment(departmentId);
+	        log.info("Found {} employees for departmentId={}", departmentEmployees.size(), departmentId);
 
 	        return new DepartmentEmployeesResponse(
-	                dept.getId(),
-	                dept.getName(),
-	                employees
+	                foundDepartment.getId(),
+	                foundDepartment.getName(),
+	                departmentEmployees
 	        );
 	    }
 	}

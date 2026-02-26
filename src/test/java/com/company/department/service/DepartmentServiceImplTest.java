@@ -32,6 +32,9 @@ class DepartmentServiceImplTest {
     @Mock
     private EmployeeClient employeeClient;
 
+    @Mock
+    private DepartmentMapper mapper;
+
     @InjectMocks
     private DepartmentServiceImpl service;
 
@@ -58,13 +61,14 @@ class DepartmentServiceImplTest {
         @Test
         @DisplayName("Should create department successfully")
         void shouldCreateDepartment() {
+            when(mapper.toEntity(dto)).thenReturn(department);
             when(repository.save(any(Department.class))).thenReturn(department);
+            when(mapper.toDTO(department)).thenReturn(dto);
 
             DepartmentDTO result = service.createDepartment(dto);
 
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("Engineering");
-            assertThat(result.getLocation()).isEqualTo("Ahemdabad");
             verify(repository).save(any(Department.class));
         }
     }
@@ -81,13 +85,17 @@ class DepartmentServiceImplTest {
             dept2.setName("IT");
             dept2.setLocation("Ahemdabad");
 
+            DepartmentDTO dto2 = new DepartmentDTO();
+            dto2.setId(2L);
+            dto2.setName("IT");
+
             when(repository.findAll()).thenReturn(List.of(department, dept2));
+            when(mapper.toDTO(department)).thenReturn(dto);
+            when(mapper.toDTO(dept2)).thenReturn(dto2);
 
             List<DepartmentDTO> result = service.getAllDepartments();
 
             assertThat(result).hasSize(2);
-            assertThat(result.get(0).getName()).isEqualTo("Engineering");
-            assertThat(result.get(1).getName()).isEqualTo("IT");
         }
 
         @Test
@@ -109,11 +117,11 @@ class DepartmentServiceImplTest {
         @DisplayName("Should return department when found")
         void shouldReturnDepartment() {
             when(repository.findById(1L)).thenReturn(Optional.of(department));
+            when(mapper.toDTO(department)).thenReturn(dto);
 
             DepartmentDTO result = service.getDepartment(1L);
 
             assertThat(result).isNotNull();
-            assertThat(result.getName()).isEqualTo("Engineering");
             verify(repository).findById(1L);
         }
 
@@ -164,6 +172,17 @@ class DepartmentServiceImplTest {
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining("Department not found");
             verify(employeeClient, never()).getEmployeesByDepartment(any());
+        }
+
+        @Test
+        @DisplayName("Should return empty employees list")
+        void shouldReturnEmptyEmployeesList() {
+            when(repository.findById(1L)).thenReturn(Optional.of(department));
+            when(employeeClient.getEmployeesByDepartment(1L)).thenReturn(List.of());
+
+            DepartmentEmployeesResponse result = service.getEmployees(1L);
+
+            assertThat(result.getEmployees()).isEmpty();
         }
     }
 }

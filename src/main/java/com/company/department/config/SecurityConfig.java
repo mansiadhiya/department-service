@@ -19,7 +19,7 @@ public class SecurityConfig {
 	private final JwtFilter jwtFilter;
 
 	@Bean
-	SecurityFilterChain filter(HttpSecurity http) throws Exception {
+	SecurityFilterChain filter(HttpSecurity http) {
 
 		http.csrf(csrf -> csrf.disable())
 				.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

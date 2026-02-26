@@ -18,37 +18,37 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EmployeeClient {
 	
-	 private final HttpServletRequest request;
+	 private final HttpServletRequest httpRequest;
 
-	    private final WebClient webClient =
+	    private final WebClient employeeWebClient =
 	            WebClient.builder()
 	                    .baseUrl("http://employee-service:8083")
 	                    .build();
 
 	    @CircuitBreaker(name = "employeeService", fallbackMethod = "getEmployeesByDepartmentFallback")
 	    @Retry(name = "employeeService")
-	    public List<EmployeeDto> getEmployeesByDepartment(Long deptId){
-	        log.info("Fetching employees for departmentId={}", deptId);
-	        String authHeader = request.getHeader("Authorization");
+	    public List<EmployeeDto> getEmployeesByDepartment(Long departmentId){
+	        log.info("Fetching employees for departmentId={}", departmentId);
+	        String authorizationHeader = httpRequest.getHeader("Authorization");
 
 	        try {
-	            List<EmployeeDto> employees = webClient.get()
-	                    .uri("/api/employees/department/{id}", deptId)
-	                    .header("Authorization", authHeader)
+	            List<EmployeeDto> departmentEmployees = employeeWebClient.get()
+	                    .uri("/api/employees/department/{id}", departmentId)
+	                    .header("Authorization", authorizationHeader)
 	                    .retrieve()
 	                    .bodyToFlux(EmployeeDto.class)
 	                    .collectList()
 	                    .block();
-	            log.info("Successfully fetched {} employees for departmentId={}", employees.size(), deptId);
-	            return employees;
-	        } catch (Exception e) {
-	        	log.warn("Employee service unavailable deptId={} reason={}", deptId, e.getMessage());
-	            throw e;
+	            log.info("Successfully fetched {} employees for departmentId={}", departmentEmployees.size(), departmentId);
+	            return departmentEmployees;
+	        } catch (Exception serviceException) {
+	        	log.warn("Employee service unavailable deptId={} reason={}", departmentId, serviceException.getMessage());
+	            throw serviceException;
 	        }
 	    }
 	    
-	    private List<EmployeeDto> getEmployeesByDepartmentFallback(Long deptId, Exception e) {
-	    	log.warn("Fallback triggered for departmentId={} reason={}", deptId, e.getMessage());
+	    private List<EmployeeDto> getEmployeesByDepartmentFallback(Long departmentId, Exception fallbackException) {
+	    	log.warn("Fallback triggered for departmentId={} reason={}", departmentId, fallbackException.getMessage());
 	        return List.of();
 	    }
 }

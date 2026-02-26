@@ -116,11 +116,25 @@ The Department Service handles CRUD operations for department data, including de
 - spring-boot-starter-webmvc
 - spring-boot-starter-security
 - spring-boot-starter-webflux
+- spring-boot-starter-actuator
 - mysql-connector-j
+- h2 (test scope)
 - lombok (1.18.42)
+- mapstruct (1.5.5.Final)
 - jjwt-api (0.11.5)
 - jjwt-impl (0.11.5)
 - jjwt-jackson (0.11.5)
+- resilience4j-spring-boot3 (2.1.0)
+- resilience4j-circuitbreaker (2.1.0)
+- resilience4j-retry (2.1.0)
+```
+
+## Build Plugins
+
+```xml
+- maven-compiler-plugin (with Lombok & MapStruct processors)
+- spring-boot-maven-plugin
+- jacoco-maven-plugin (0.8.11) - Code coverage
 ```
 
 ## Environment Variables
@@ -270,6 +284,17 @@ department-service/
 
 ## Testing Instructions
 
+### Test Classes Available
+- **Controller Layer**: DepartmentControllerTest
+- **Service Layer**: DepartmentServiceImplTest, DepartmentMapperTest
+- **Repository Layer**: DepartmentRepositoryTest
+- **Config Layer**: JwtUtilTest, JwtFilterTest, LoggingFilterTest, SecurityConfigTest
+- **DTO Layer**: DepartmentDTOTest, DepartmentEmployeesResponseTest, EmployeeDtoTest
+- **Entity Layer**: DepartmentTest
+- **Exception Layer**: GlobalExceptionHandlerTest, ResourceNotFoundExceptionTest
+- **Client Layer**: EmployeeClientTest
+- **Application**: DepartmentServiceApplicationTest, DepartmentServiceApplicationTests
+
 ### Unit Tests
 Run all unit tests:
 ```bash
@@ -278,7 +303,7 @@ mvn test
 
 Run specific test class:
 ```bash
-mvn test -Dtest=DepartmentServiceTest
+mvn test -Dtest=DepartmentServiceImplTest
 ```
 
 ### Integration Tests
@@ -287,12 +312,23 @@ Run integration tests:
 mvn verify
 ```
 
-### Test Coverage
-Generate coverage report:
+### Test Coverage (JaCoCo)
+Generate test coverage report:
 ```bash
 mvn clean test jacoco:report
 ```
-View at: `target/site/jacoco/index.html`
+View report at: `target/site/jacoco/index.html`
+
+Generate coverage with verify:
+```bash
+mvn clean verify
+```
+
+### Test Configuration
+- Tests use H2 in-memory database
+- No MySQL required for testing
+- Security filters disabled in controller tests
+- Mock beans used for external dependencies
 
 ### Manual API Testing
 
@@ -352,16 +388,21 @@ INSERT INTO departments (name, code, description, manager_id, budget, location) 
 ```
 
 ### Testing Checklist
-- [ ] Create department with valid data
-- [ ] Create department with duplicate code
-- [ ] Update department information
-- [ ] Delete empty department
-- [ ] Prevent delete department with employees
-- [ ] Get department hierarchy
-- [ ] Search departments by name
-- [ ] Validate manager exists
-- [ ] Test circular hierarchy prevention
-- [ ] Test pagination
+- [x] Create department with valid data
+- [x] Create department with duplicate code
+- [x] Update department information
+- [x] Delete empty department
+- [x] Prevent delete department with employees
+- [x] Get department hierarchy
+- [x] Search departments by name
+- [x] Validate manager exists
+- [x] Test circular hierarchy prevention
+- [x] Test pagination
+- [x] JWT token validation
+- [x] Exception handling
+- [x] DTO validation
+- [x] Mapper functionality
+- [x] Repository CRUD operations
 
 ## Docker Support
 

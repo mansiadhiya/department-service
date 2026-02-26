@@ -5,9 +5,12 @@ import lombok.*;
 
 @Getter
 @AllArgsConstructor
+@Data
 public class DepartmentEmployeesResponse {
 
-    private Long departmentId;
+    public DepartmentEmployeesResponse() {
+    }
+	private Long departmentId;
     private String departmentName;
     private List<EmployeeDto> employees;
 }

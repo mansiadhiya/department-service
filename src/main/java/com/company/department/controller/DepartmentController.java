@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,26 +23,26 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DepartmentController {
 	
-    private final DepartmentService service;
+    private final DepartmentService departmentService;
     
     @PostMapping
-    public ResponseEntity<DepartmentDTO> create(@Valid @RequestBody DepartmentDTO dto){
-        return new ResponseEntity<>(service.createDepartment(dto), HttpStatus.CREATED);
+    public ResponseEntity<DepartmentDTO> create(@Valid @RequestBody DepartmentDTO departmentDto){
+        return new ResponseEntity<>(departmentService.createDepartment(departmentDto), HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<DepartmentDTO>> getAll(){
-        return ResponseEntity.ok(service.getAllDepartments());
+        return ResponseEntity.ok(departmentService.getAllDepartments());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<DepartmentDTO> get(@PathVariable Long id){
-        return ResponseEntity.ok(service.getDepartment(id));
+    public ResponseEntity<DepartmentDTO> get(@PathVariable("id") Long departmentId){
+        return ResponseEntity.ok(departmentService.getDepartment(departmentId));
     }
     
     @GetMapping("/{id}/employees")
     public DepartmentEmployeesResponse getDepartmentEmployees(
-            @PathVariable Long id){
-        return service.getEmployees(id);
+            @PathVariable("id") Long departmentId){
+        return departmentService.getEmployees(departmentId);
     }
 }
